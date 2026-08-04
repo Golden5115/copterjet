@@ -5,6 +5,7 @@ import Link from "next/link";
 
 export default function RequestCharter() {
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [category, setCategory] = useState("Jet");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,14 +134,41 @@ export default function RequestCharter() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Category (Jet/Helicopter)</label>
-                <select className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none bg-white">
+                <select 
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none bg-white"
+                >
                   <option value="Jet">Jet</option>
                   <option value="Helicopter">Helicopter</option>
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Aircraft Type</label>
-                <input type="text" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
+                <select className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none bg-white">
+                  <option value="">Select Aircraft Type</option>
+                  {category === 'Jet' && (
+                    <>
+                      <option value="Global 7000">Global 7000</option>
+                      <option value="Global 6000">Global 6000</option>
+                      <option value="Gulfstream V">Gulfstream V</option>
+                      <option value="Gulfstream IV">Gulfstream IV</option>
+                      <option value="Legacy 600">Legacy 600</option>
+                      <option value="Challenger 605">Challenger 605</option>
+                      <option value="Challenger 604">Challenger 604</option>
+                      <option value="Hawker 800xp">Hawker 800xp</option>
+                      <option value="Phenom 300">Phenom 300</option>
+                    </>
+                  )}
+                  {category === 'Helicopter' && (
+                    <>
+                      <option value="AW-139">AW-139</option>
+                      <option value="S-76">S-76</option>
+                      <option value="EC-155">EC-155</option>
+                      <option value="AW-109">AW-109</option>
+                    </>
+                  )}
+                </select>
               </div>
             </div>
           </section>
@@ -196,10 +224,27 @@ export default function RequestCharter() {
             </div>
           </section>
 
-          {/* 8. Comments */}
+          {/* 8. Operational Requirements */}
           <section>
             <h2 className="text-2xl font-semibold text-[var(--color-copter-blue)] mb-6 border-l-4 border-[var(--color-copter-red)] pl-4">
-              8. Comments
+              8. Operational Requirements
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Aircraft Waiting Time (Hours)</label>
+                <input type="number" min="0" placeholder="e.g. 4" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Aircraft Waiting Time (Days)</label>
+                <input type="number" min="0" placeholder="e.g. 2" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
+              </div>
+            </div>
+          </section>
+
+          {/* 9. Comments */}
+          <section>
+            <h2 className="text-2xl font-semibold text-[var(--color-copter-blue)] mb-6 border-l-4 border-[var(--color-copter-red)] pl-4">
+              9. Comments
             </h2>
             <div className="w-full">
               <label className="block text-sm font-medium text-gray-700 mb-2">Additional Information or Special Instructions</label>
