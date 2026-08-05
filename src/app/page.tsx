@@ -19,7 +19,7 @@ export default function Home() {
             playsInline
             className="absolute inset-0 w-full h-full object-cover"
           >
-            <source src="/cinematic-bg.mp4" type="video/mp4" />
+            <source src="https://res.cloudinary.com/dqoppw9x1/video/upload/v1785933296/Web_Vidoe_2_diqexs.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
 
