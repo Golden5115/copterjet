@@ -19,7 +19,7 @@ export default function Home() {
             playsInline
             className="absolute inset-0 w-full h-full object-cover"
           >
-            <source src="https://res.cloudinary.com/dqoppw9x1/video/upload/v1785933296/Web_Vidoe_2_diqexs.mp4" type="video/mp4" />
+            <source src="https://res.cloudinary.com/dqoppw9x1/video/upload/v1786013852/Web_Vidoe_2_1_feaq65.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
 
@@ -69,7 +69,7 @@ export default function Home() {
             </a>
           </div>
 
-          <div 
+          <div
             className="mt-12 text-sm md:text-base text-gray-300 font-light flex flex-col md:flex-row gap-4 md:gap-8 justify-center items-center opacity-0 animate-fade-up"
             style={{ animationDelay: '1.0s' }}
           >
