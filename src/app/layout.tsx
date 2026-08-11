@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
+import CookieConsent from "@/components/CookieConsent";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -26,12 +27,11 @@ export default function RootLayout({
         {/* Global Navbar */}
         <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08),0_1px_2px_rgba(0,0,0,0.06)] animate-fade-in">
           <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 sm:h-[88px] flex items-center justify-between">
-            {/* Logo on the left - Increased size */}
             <a href="/" className="flex items-center shrink-0">
               <img
-                src="/Logo5.png"
-                alt="CopterJetGroup Logo"
-                className="h-12 sm:h-16 w-auto"
+                src="/CopterJetLogo.jpeg"
+                alt="CopterJet Group Logo"
+                className="h-12 sm:h-16 w-auto object-contain"
               />
             </a>
 
@@ -50,7 +50,9 @@ export default function RootLayout({
           </div>
         </nav>
         
-        {children}
+        <main className="flex-1">{children}</main>
+        
+        <CookieConsent />
       </body>
     </html>
   );

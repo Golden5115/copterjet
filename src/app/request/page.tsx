@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 
 export default function RequestCharter() {
@@ -13,7 +12,7 @@ export default function RequestCharter() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-copter-light)] pt-32 pb-12 px-4 sm:px-6 lg:px-8 font-sans relative">
+    <div className="min-h-screen bg-[var(--color-copter-light)] pt-32 pb-16 px-4 sm:px-6 lg:px-8 font-sans relative">
       
       {/* Back Button */}
       <div className="max-w-4xl mx-auto mb-4 flex justify-start">
@@ -29,69 +28,98 @@ export default function RequestCharter() {
       </div>
 
       {/* Header */}
-      <div className="max-w-4xl mx-auto mb-10 text-center">
-        <h1 className="text-3xl font-extrabold text-[var(--color-copter-blue)]">
+      <div className="max-w-4xl mx-auto mb-8 text-center">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-[var(--color-copter-blue)]">
           Air Charter Request
         </h1>
-        <p className="mt-2 text-lg text-[var(--color-copter-grey)]">
+        <p className="mt-2 text-base sm:text-lg text-[var(--color-copter-grey)]">
           Please complete the form below with your travel information.
         </p>
+        <div className="mt-3 inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[var(--color-copter-red)] bg-red-50 px-3 py-1.5 rounded-full border border-red-100">
+          <span>* Indicates mandatory section / field</span>
+        </div>
       </div>
 
       {/* Main Form */}
       <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
         <form onSubmit={handleSubmit} className="p-8 sm:p-12 space-y-12">
           
-          {/* 1. Contact Details */}
+          {/* 1. Contact Details (Mandatory) */}
           <section>
-            <h2 className="text-2xl font-semibold text-[var(--color-copter-blue)] mb-6 border-l-4 border-[var(--color-copter-red)] pl-4">
-              1. Contact Details
-            </h2>
+            <div className="flex items-center justify-between mb-6 border-l-4 border-[var(--color-copter-red)] pl-4">
+              <h2 className="text-2xl font-semibold text-[var(--color-copter-blue)]">
+                1. Contact Details <span className="text-[var(--color-copter-red)] font-bold">*</span>
+              </h2>
+              <span className="text-xs uppercase tracking-wider font-bold text-[var(--color-copter-red)] bg-red-50 px-2.5 py-1 rounded-md">
+                Mandatory
+              </span>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                <input required type="text" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Full Name <span className="text-[var(--color-copter-red)]">*</span>
+                </label>
+                <input required type="text" placeholder="John Doe" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Company/Organization (if applicable)</label>
-                <input type="text" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
+                <input type="text" placeholder="Company Name" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                <input required type="email" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address <span className="text-[var(--color-copter-red)]">*</span>
+                </label>
+                <input required type="email" placeholder="john@example.com" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Telephone Number</label>
-                <input required type="tel" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Telephone Number <span className="text-[var(--color-copter-red)]">*</span>
+                </label>
+                <input required type="tel" placeholder="+234..." className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
               </div>
             </div>
           </section>
 
-          {/* 2. Flight Information */}
+          {/* 2. Flight Information (Mandatory) */}
           <section>
-            <h2 className="text-2xl font-semibold text-[var(--color-copter-blue)] mb-6 border-l-4 border-[var(--color-copter-red)] pl-4">
-              2. Flight Information
-            </h2>
+            <div className="flex items-center justify-between mb-6 border-l-4 border-[var(--color-copter-red)] pl-4">
+              <h2 className="text-2xl font-semibold text-[var(--color-copter-blue)]">
+                2. Flight Information <span className="text-[var(--color-copter-red)] font-bold">*</span>
+              </h2>
+              <span className="text-xs uppercase tracking-wider font-bold text-[var(--color-copter-red)] bg-red-50 px-2.5 py-1 rounded-md">
+                Mandatory
+              </span>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Departure Location (Airport/Helipad/Place)</label>
-                <input required type="text" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Departure Location (Airport/Helipad/Place) <span className="text-[var(--color-copter-red)]">*</span>
+                </label>
+                <input required type="text" placeholder="e.g. Murtala Muhammed International Airport, Lagos" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Destination (Airport/Helipad/Place)</label>
-                <input required type="text" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Destination (Airport/Helipad/Place) <span className="text-[var(--color-copter-red)]">*</span>
+                </label>
+                <input required type="text" placeholder="e.g. Nnamdi Azikiwe International Airport, Abuja" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Departure Date</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Departure Date <span className="text-[var(--color-copter-red)]">*</span>
+                </label>
                 <input required type="date" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Departure Time</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Preferred Departure Time <span className="text-[var(--color-copter-red)]">*</span>
+                </label>
                 <input required type="time" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Return Flight Required?</label>
-                <select className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none bg-white">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Return Flight Required? <span className="text-[var(--color-copter-red)]">*</span>
+                </label>
+                <select required className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none bg-white">
                   <option value="No">No</option>
                   <option value="Yes">Yes</option>
                 </select>
@@ -103,19 +131,28 @@ export default function RequestCharter() {
             </div>
           </section>
 
-          {/* 3. Passenger Details */}
+          {/* 3. Passenger Details (Mandatory) */}
           <section>
-            <h2 className="text-2xl font-semibold text-[var(--color-copter-blue)] mb-6 border-l-4 border-[var(--color-copter-red)] pl-4">
-              3. Passenger Details
-            </h2>
+            <div className="flex items-center justify-between mb-6 border-l-4 border-[var(--color-copter-red)] pl-4">
+              <h2 className="text-2xl font-semibold text-[var(--color-copter-blue)]">
+                3. Passenger Details <span className="text-[var(--color-copter-red)] font-bold">*</span>
+              </h2>
+              <span className="text-xs uppercase tracking-wider font-bold text-[var(--color-copter-red)] bg-red-50 px-2.5 py-1 rounded-md">
+                Mandatory
+              </span>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Number of Passengers</label>
-                <input required type="number" min="1" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Number of Passengers <span className="text-[var(--color-copter-red)]">*</span>
+                </label>
+                <input required type="number" min="1" placeholder="e.g. 4" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Passenger Type</label>
-                <select className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none bg-white">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Passenger Type <span className="text-[var(--color-copter-red)]">*</span>
+                </label>
+                <select required className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none bg-white">
                   <option value="Executive">Executive</option>
                   <option value="Corporate">Corporate</option>
                   <option value="Government">Government</option>
@@ -126,15 +163,23 @@ export default function RequestCharter() {
             </div>
           </section>
 
-          {/* 4. Aircraft Preference */}
+          {/* 4. Aircraft Preference (Mandatory) */}
           <section>
-            <h2 className="text-2xl font-semibold text-[var(--color-copter-blue)] mb-6 border-l-4 border-[var(--color-copter-red)] pl-4">
-              4. Aircraft Preference
-            </h2>
+            <div className="flex items-center justify-between mb-6 border-l-4 border-[var(--color-copter-red)] pl-4">
+              <h2 className="text-2xl font-semibold text-[var(--color-copter-blue)]">
+                4. Aircraft Preference <span className="text-[var(--color-copter-red)] font-bold">*</span>
+              </h2>
+              <span className="text-xs uppercase tracking-wider font-bold text-[var(--color-copter-red)] bg-red-50 px-2.5 py-1 rounded-md">
+                Mandatory
+              </span>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Category (Jet/Helicopter)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category (Jet/Helicopter) <span className="text-[var(--color-copter-red)]">*</span>
+                </label>
                 <select 
+                  required
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none bg-white"
@@ -144,8 +189,10 @@ export default function RequestCharter() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Aircraft Type</label>
-                <select className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none bg-white">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Preferred Aircraft Type <span className="text-[var(--color-copter-red)]">*</span>
+                </label>
+                <select required className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none bg-white">
                   <option value="">Select Aircraft Type</option>
                   {category === 'Jet' && (
                     <>
@@ -173,30 +220,40 @@ export default function RequestCharter() {
             </div>
           </section>
 
-          {/* 5. Purpose of Travel */}
+          {/* 5. Purpose of Travel (Mandatory) */}
           <section>
-            <h2 className="text-2xl font-semibold text-[var(--color-copter-blue)] mb-6 border-l-4 border-[var(--color-copter-red)] pl-4">
-              5. Purpose of Travel
-            </h2>
+            <div className="flex items-center justify-between mb-6 border-l-4 border-[var(--color-copter-red)] pl-4">
+              <h2 className="text-2xl font-semibold text-[var(--color-copter-blue)]">
+                5. Purpose of Travel <span className="text-[var(--color-copter-red)] font-bold">*</span>
+              </h2>
+              <span className="text-xs uppercase tracking-wider font-bold text-[var(--color-copter-red)] bg-red-50 px-2.5 py-1 rounded-md">
+                Mandatory
+              </span>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {['Business', 'Corporate', 'Oil & Gas', 'Medical', 'Government', 'Tourism', 'Humanitarian', 'Other'].map(purpose => (
+              {['Business', 'Corporate', 'Oil & Gas', 'Medical', 'Government', 'Tourism', 'Humanitarian', 'Other'].map((purpose, idx) => (
                 <label key={purpose} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                  <input type="radio" name="purpose" value={purpose} className="text-[var(--color-copter-blue)] focus:ring-[var(--color-copter-blue)]" />
+                  <input required={idx === 0} type="radio" name="purpose" value={purpose} className="text-[var(--color-copter-blue)] focus:ring-[var(--color-copter-blue)]" />
                   <span className="text-sm text-gray-700 font-medium">{purpose}</span>
                 </label>
               ))}
             </div>
           </section>
 
-          {/* 6. Baggage */}
+          {/* 6. Baggage (Optional) */}
           <section>
-            <h2 className="text-2xl font-semibold text-[var(--color-copter-blue)] mb-6 border-l-4 border-[var(--color-copter-red)] pl-4">
-              6. Baggage
-            </h2>
+            <div className="flex items-center justify-between mb-6 border-l-4 border-gray-300 pl-4">
+              <h2 className="text-2xl font-semibold text-[var(--color-copter-blue)]">
+                6. Baggage
+              </h2>
+              <span className="text-xs uppercase tracking-wider font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded-md">
+                Optional
+              </span>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Number of Bags</label>
-                <input type="number" min="0" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
+                <input type="number" min="0" placeholder="e.g. 3" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Estimated Total Weight</label>
@@ -204,16 +261,21 @@ export default function RequestCharter() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Oversized or Special Cargo</label>
-                <input type="text" placeholder="if any" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
+                <input type="text" placeholder="If any" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
               </div>
             </div>
           </section>
 
-          {/* 7. Additional Requirements */}
+          {/* 7. Additional Requirements (Optional) */}
           <section>
-            <h2 className="text-2xl font-semibold text-[var(--color-copter-blue)] mb-6 border-l-4 border-[var(--color-copter-red)] pl-4">
-              7. Additional Requirements
-            </h2>
+            <div className="flex items-center justify-between mb-6 border-l-4 border-gray-300 pl-4">
+              <h2 className="text-2xl font-semibold text-[var(--color-copter-blue)]">
+                7. Additional Requirements
+              </h2>
+              <span className="text-xs uppercase tracking-wider font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded-md">
+                Optional
+              </span>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {['Ground Transportation', 'Catering', 'Hotel Accommodation', 'Security', 'Accessibility & Mobility Assistance', 'Other Special Requests'].map(req => (
                 <label key={req} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
@@ -224,31 +286,45 @@ export default function RequestCharter() {
             </div>
           </section>
 
-          {/* 8. Operational Requirements */}
+          {/* 8. Operational Requirements (Mandatory) */}
           <section>
-            <h2 className="text-2xl font-semibold text-[var(--color-copter-blue)] mb-6 border-l-4 border-[var(--color-copter-red)] pl-4">
-              8. Operational Requirements
-            </h2>
+            <div className="flex items-center justify-between mb-6 border-l-4 border-[var(--color-copter-red)] pl-4">
+              <h2 className="text-2xl font-semibold text-[var(--color-copter-blue)]">
+                8. Operational Requirements <span className="text-[var(--color-copter-red)] font-bold">*</span>
+              </h2>
+              <span className="text-xs uppercase tracking-wider font-bold text-[var(--color-copter-red)] bg-red-50 px-2.5 py-1 rounded-md">
+                Mandatory
+              </span>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Aircraft Waiting Time (Hours)</label>
-                <input type="number" min="0" placeholder="e.g. 4" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Aircraft Waiting Time (Hours) <span className="text-[var(--color-copter-red)]">*</span>
+                </label>
+                <input required type="number" min="0" placeholder="e.g. 4" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Aircraft Waiting Time (Days)</label>
-                <input type="number" min="0" placeholder="e.g. 2" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Aircraft Waiting Time (Days) <span className="text-[var(--color-copter-red)]">*</span>
+                </label>
+                <input required type="number" min="0" placeholder="e.g. 2" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none" />
               </div>
             </div>
           </section>
 
-          {/* 9. Comments */}
+          {/* 9. Comments (Optional) */}
           <section>
-            <h2 className="text-2xl font-semibold text-[var(--color-copter-blue)] mb-6 border-l-4 border-[var(--color-copter-red)] pl-4">
-              9. Comments
-            </h2>
+            <div className="flex items-center justify-between mb-6 border-l-4 border-gray-300 pl-4">
+              <h2 className="text-2xl font-semibold text-[var(--color-copter-blue)]">
+                9. Comments
+              </h2>
+              <span className="text-xs uppercase tracking-wider font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded-md">
+                Optional
+              </span>
+            </div>
             <div className="w-full">
               <label className="block text-sm font-medium text-gray-700 mb-2">Additional Information or Special Instructions</label>
-              <textarea rows={4} className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none resize-y"></textarea>
+              <textarea rows={4} placeholder="Specify any additional travel preferences or notes..." className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--color-copter-blue)] focus:border-transparent transition-all outline-none resize-y"></textarea>
             </div>
           </section>
 
