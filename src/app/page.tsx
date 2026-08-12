@@ -1,32 +1,77 @@
 "use client";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isMuted, setIsMuted] = useState(true);
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      const nextMuted = !videoRef.current.muted;
+      videoRef.current.muted = nextMuted;
+      setIsMuted(nextMuted);
+    }
+  };
+
   return (
     <>
-
-
       {/* Main Hero */}
       <section className="relative min-h-screen w-full flex flex-col items-center justify-center bg-black overflow-hidden pt-24 pb-8">
 
         {/* Cinematic Video Background */}
         <div className="absolute inset-0 z-0 opacity-0 animate-fade-in" style={{ animationDelay: '0s' }}>
           <video
+            ref={videoRef}
             autoPlay
             loop
-            muted
+            muted={isMuted}
             playsInline
             className="absolute inset-0 w-full h-full object-cover"
           >
-            <source src="https://res.cloudinary.com/dqoppw9x1/video/upload/v1786013852/Web_Vidoe_2_1_feaq65.mp4" type="video/mp4" />
+            <source src="https://res.cloudinary.com/dqoppw9x1/video/upload/v1786538359/New_Web_Video_doslt7.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
 
-          {/* Dark overlay to ensure text pops perfectly regardless of the video scene (bright sunset or dark tarmac) */}
+          {/* Dark overlay to ensure text pops perfectly regardless of the video scene */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80 pointer-events-none mix-blend-multiply"></div>
           {/* Extra vignette for cinematic feel */}
           <div className="absolute inset-0 shadow-[inset_0_0_150px_rgba(0,0,0,0.9)] pointer-events-none"></div>
+        </div>
+
+        {/* Audio Toggle Control Button floating in Hero section */}
+        <div className="absolute bottom-6 right-6 sm:bottom-8 sm:right-8 z-20 opacity-0 animate-fade-in" style={{ animationDelay: '1.2s' }}>
+          <button
+            onClick={toggleMute}
+            type="button"
+            aria-label={isMuted ? "Unmute hero video audio" : "Mute hero video audio"}
+            className="group relative flex items-center gap-3 px-4 py-2.5 rounded-full bg-black/60 hover:bg-black/80 text-white backdrop-blur-md border border-white/20 hover:border-white/60 transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.5)] cursor-pointer hover:scale-105 active:scale-95"
+          >
+            {isMuted ? (
+              <>
+                <div className="relative flex items-center justify-center">
+                  {/* Pulse ring encouraging user interaction to enable sound */}
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-white/20 animate-ping opacity-75"></span>
+                  <svg className="w-5 h-5 text-gray-300 group-hover:text-white transition-colors relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                  </svg>
+                </div>
+                <span className="text-xs sm:text-sm font-medium tracking-wide text-gray-200 group-hover:text-white">Enable Audio</span>
+              </>
+            ) : (
+              <>
+                {/* Active sound wave animation */}
+                <div className="flex items-end gap-0.5 h-4 px-0.5">
+                  <span className="w-1 bg-[var(--color-copter-blue,#38bdf8)] animate-[bounce_1s_infinite_100ms] h-full rounded-full"></span>
+                  <span className="w-1 bg-[var(--color-copter-blue,#38bdf8)] animate-[bounce_1s_infinite_300ms] h-2/3 rounded-full"></span>
+                  <span className="w-1 bg-[var(--color-copter-blue,#38bdf8)] animate-[bounce_1s_infinite_200ms] h-5/6 rounded-full"></span>
+                </div>
+                <span className="text-xs sm:text-sm font-medium tracking-wide text-white">Sound On</span>
+              </>
+            )}
+          </button>
         </div>
 
         {/* Content overlay */}
