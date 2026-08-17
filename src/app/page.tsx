@@ -7,13 +7,28 @@ export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const userInteractedRef = useRef<boolean>(false);
+
+  // Scroll to top on page mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Ensure video element autoplays muted immediately without browser pause
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = true;
+      videoRef.current.play().catch(() => {});
+    }
+  }, []);
 
   // Initialize luxury ambient jet flight audio synthesizer (Web Audio API)
   const initAmbientAudio = () => {
     try {
       if (!audioContextRef.current) {
         const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        if (!AudioCtx) return;
         const ctx = new AudioCtx();
         audioContextRef.current = ctx;
 
@@ -44,7 +59,7 @@ export default function Home() {
         filter.frequency.setValueAtTime(220, ctx.currentTime);
 
         const gainNode = ctx.createGain();
-        gainNode.gain.setValueAtTime(isMuted ? 0 : 0.18, ctx.currentTime);
+        gainNode.gain.setValueAtTime(0.18, ctx.currentTime);
         gainNodeRef.current = gainNode;
 
         whiteNoise.connect(filter);
@@ -59,100 +74,126 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    // Attempt unmuted playback on initial load
-    if (videoRef.current) {
-      videoRef.current.muted = isMuted;
-      videoRef.current.play().catch(() => {
-        // Silent fallback for strict browser autoplay policies until user gesture
-        if (videoRef.current) {
-          videoRef.current.muted = true;
-          videoRef.current.play().catch(() => {});
-        }
-      });
-    }
-
-    // Auto-unmute sound immediately on first user interaction anywhere on the document
-    const handleFirstUserGesture = () => {
+  const enableSound = async () => {
+    try {
       initAmbientAudio();
+      if (audioContextRef.current && audioContextRef.current.state === "suspended") {
+        await audioContextRef.current.resume();
+      }
       if (videoRef.current) {
         videoRef.current.muted = false;
-        videoRef.current.play().catch(() => {});
+        await videoRef.current.play().catch(() => {});
       }
       if (gainNodeRef.current && audioContextRef.current) {
-        gainNodeRef.current.gain.setValueAtTime(0.18, audioContextRef.current.currentTime);
+        const ctx = audioContextRef.current;
+        gainNodeRef.current.gain.cancelScheduledValues(ctx.currentTime);
+        gainNodeRef.current.gain.setTargetAtTime(0.18, ctx.currentTime, 0.2);
       }
       setIsMuted(false);
-      window.removeEventListener("pointerdown", handleFirstUserGesture);
-      window.removeEventListener("touchstart", handleFirstUserGesture);
-      window.removeEventListener("keydown", handleFirstUserGesture);
-    };
+    } catch {
+      // Fallback if browser requires user gesture
+    }
+  };
 
-    window.addEventListener("pointerdown", handleFirstUserGesture, { once: true });
-    window.addEventListener("touchstart", handleFirstUserGesture, { once: true });
-    window.addEventListener("keydown", handleFirstUserGesture, { once: true });
+  const disableSound = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = true;
+    }
+    if (gainNodeRef.current && audioContextRef.current) {
+      const ctx = audioContextRef.current;
+      gainNodeRef.current.gain.cancelScheduledValues(ctx.currentTime);
+      gainNodeRef.current.gain.setTargetAtTime(0, ctx.currentTime, 0.1);
+    }
+    setIsMuted(true);
+  };
 
-    return () => {
-      window.removeEventListener("pointerdown", handleFirstUserGesture);
-      window.removeEventListener("touchstart", handleFirstUserGesture);
-      window.removeEventListener("keydown", handleFirstUserGesture);
-    };
-  }, []);
-
-  // Sync mute state changes
+  // Sync mute state changes with video element and Web Audio gain
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.muted = isMuted;
     }
     if (gainNodeRef.current && audioContextRef.current) {
-      gainNodeRef.current.gain.setValueAtTime(isMuted ? 0 : 0.18, audioContextRef.current.currentTime);
+      const ctx = audioContextRef.current;
+      const targetGain = isMuted ? 0 : 0.18;
+      gainNodeRef.current.gain.cancelScheduledValues(ctx.currentTime);
+      gainNodeRef.current.gain.setTargetAtTime(targetGain, ctx.currentTime, 0.2);
     }
   }, [isMuted]);
 
+  // Turn on sound on partial scrolling or interaction
+  useEffect(() => {
+    let triggered = false;
+
+    const handleScrollOrGesture = () => {
+      if (triggered || userInteractedRef.current) return;
+      triggered = true;
+      enableSound();
+      cleanupListeners();
+    };
+
+    const cleanupListeners = () => {
+      window.removeEventListener("scroll", handleScrollOrGesture);
+      window.removeEventListener("wheel", handleScrollOrGesture);
+      window.removeEventListener("touchmove", handleScrollOrGesture);
+      window.removeEventListener("touchstart", handleScrollOrGesture);
+      window.removeEventListener("pointerdown", handleScrollOrGesture);
+      window.removeEventListener("keydown", handleScrollOrGesture);
+    };
+
+    // Listen for partial scroll (wheel, scroll, touchmove) and gestures
+    window.addEventListener("scroll", handleScrollOrGesture, { passive: true });
+    window.addEventListener("wheel", handleScrollOrGesture, { passive: true });
+    window.addEventListener("touchmove", handleScrollOrGesture, { passive: true });
+    window.addEventListener("touchstart", handleScrollOrGesture, { passive: true });
+    window.addEventListener("pointerdown", handleScrollOrGesture, { passive: true });
+    window.addEventListener("keydown", handleScrollOrGesture, { passive: true });
+
+    return () => {
+      cleanupListeners();
+    };
+  }, []);
+
   const toggleMute = () => {
-    initAmbientAudio();
-    const nextMuted = !isMuted;
-    setIsMuted(nextMuted);
-    if (videoRef.current) {
-      videoRef.current.muted = nextMuted;
-      if (!nextMuted) {
-        videoRef.current.play().catch(() => {});
-      }
+    userInteractedRef.current = true;
+    if (isMuted) {
+      enableSound();
+    } else {
+      disableSound();
     }
   };
 
   return (
     <>
-      {/* Main Hero */}
-      <section className="relative min-h-screen w-full flex flex-col items-center justify-center bg-black overflow-hidden pt-24 pb-8">
+      {/* Main Hero Section with Subtle Height for Natural Desktop Scrolling */}
+      <section className="relative min-h-[108vh] w-full flex flex-col items-center justify-center bg-black pt-24 pb-12 px-4">
 
-        {/* Cinematic Video Background */}
-        <div className="absolute inset-0 z-0 opacity-0 animate-fade-in" style={{ animationDelay: '0s' }}>
+        {/* Cinematic Video Background (Fixed/Cover to remain visible while scrolling) */}
+        <div className="fixed inset-0 z-0 opacity-0 animate-fade-in pointer-events-none" style={{ animationDelay: '0s' }}>
           <video
             ref={videoRef}
             autoPlay
             loop
-            muted={isMuted}
+            muted
             playsInline
-            className="absolute inset-0 w-full h-full object-cover"
+            className="w-full h-full object-cover"
           >
             <source src="https://res.cloudinary.com/dqoppw9x1/video/upload/v1786538359/New_Web_Video_doslt7.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
 
           {/* Dark overlay to ensure text pops perfectly regardless of the video scene */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80 pointer-events-none mix-blend-multiply"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/85 pointer-events-none mix-blend-multiply"></div>
           {/* Extra vignette for cinematic feel */}
           <div className="absolute inset-0 shadow-[inset_0_0_150px_rgba(0,0,0,0.9)] pointer-events-none"></div>
         </div>
 
         {/* Audio Toggle Control Button floating in Hero section */}
-        <div className="absolute bottom-6 right-6 sm:bottom-8 sm:right-8 z-20 opacity-0 animate-fade-in" style={{ animationDelay: '1.2s' }}>
+        <div className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-30 opacity-0 animate-fade-in" style={{ animationDelay: '1.2s' }}>
           <button
             onClick={toggleMute}
             type="button"
             aria-label={isMuted ? "Unmute hero video audio" : "Mute hero video audio"}
-            className="group relative flex items-center gap-3 px-4 py-2.5 rounded-full bg-black/60 hover:bg-black/80 text-white backdrop-blur-md border border-white/20 hover:border-white/60 transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.5)] cursor-pointer hover:scale-105 active:scale-95"
+            className="group relative flex items-center gap-3 px-4 py-2.5 rounded-full bg-black/70 hover:bg-black/90 text-white backdrop-blur-md border border-white/20 hover:border-white/60 transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.6)] cursor-pointer hover:scale-105 active:scale-95"
           >
             {isMuted ? (
               <>
@@ -180,8 +221,8 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Content overlay */}
-        <div className="relative z-10 flex flex-col items-center max-w-4xl px-4 text-center">
+        {/* Unified Content Container */}
+        <div className="relative z-10 flex flex-col items-center max-w-4xl px-4 text-center my-auto">
 
           <h1
             className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight drop-shadow-2xl opacity-0 animate-fade-up"
@@ -234,18 +275,22 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Terms & Conditions & Privacy Policy at bottom of landing page */}
+          {/* Copyright & Terms & Conditions & Privacy Policy at bottom of landing page */}
           <div
-            className="mt-8 pt-6 border-t border-white/10 text-xs sm:text-sm text-gray-400 font-light flex items-center justify-center gap-6 opacity-0 animate-fade-up"
+            className="mt-8 pt-6 w-full border-t border-white/10 text-xs sm:text-sm text-gray-400 font-light flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 opacity-0 animate-fade-up"
             style={{ animationDelay: '1.2s' }}
           >
-            <Link href="/terms" className="hover:text-white transition-colors underline-offset-4 hover:underline">
-              Terms & Conditions
-            </Link>
-            <span className="text-gray-600">•</span>
-            <Link href="/privacy" className="hover:text-white transition-colors underline-offset-4 hover:underline">
-              Privacy Policy
-            </Link>
+            <span>© 2026 CopterJet International. All rights reserved.</span>
+            <span className="hidden sm:inline text-gray-600">•</span>
+            <div className="flex items-center gap-6">
+              <Link href="/terms" className="hover:text-white transition-colors underline-offset-4 hover:underline">
+                Terms & Conditions
+              </Link>
+              <span className="text-gray-600">•</span>
+              <Link href="/privacy" className="hover:text-white transition-colors underline-offset-4 hover:underline">
+                Privacy Policy
+              </Link>
+            </div>
           </div>
         </div>
 
