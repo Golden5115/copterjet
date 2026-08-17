@@ -357,23 +357,23 @@ export default function Home() {
               <span>Help desk: +2349139347442</span>
             </div>
           </div>
+        </div>
 
-          {/* Copyright & Terms & Conditions & Privacy Policy at bottom of landing page */}
-          <div
-            className="mt-8 pt-6 w-full border-t border-white/10 text-xs sm:text-sm text-gray-400 font-light flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 opacity-0 animate-fade-up"
-            style={{ animationDelay: '1.2s' }}
-          >
-            <span>© 2026 CopterJet International. All rights reserved.</span>
-            <span className="hidden sm:inline text-gray-600">•</span>
-            <div className="flex items-center gap-6">
-              <Link href="/terms" className="hover:text-white transition-colors underline-offset-4 hover:underline">
-                Terms & Conditions
-              </Link>
-              <span className="text-gray-600">•</span>
-              <Link href="/privacy" className="hover:text-white transition-colors underline-offset-4 hover:underline">
-                Privacy Policy
-              </Link>
-            </div>
+        {/* Copyright & Terms & Conditions & Privacy Policy pinned to bottom of hero section */}
+        <div
+          className="absolute bottom-4 left-0 right-0 z-10 w-full px-4 text-xs sm:text-sm text-gray-400 font-light flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 opacity-0 animate-fade-up"
+          style={{ animationDelay: '1.2s' }}
+        >
+          <span>© 2026 CopterJet International. All rights reserved.</span>
+          <span className="hidden sm:inline text-gray-600">•</span>
+          <div className="flex items-center gap-6">
+            <Link href="/terms" className="hover:text-white transition-colors underline-offset-4 hover:underline">
+              Terms & Conditions
+            </Link>
+            <span className="text-gray-600">•</span>
+            <Link href="/privacy" className="hover:text-white transition-colors underline-offset-4 hover:underline">
+              Privacy Policy
+            </Link>
           </div>
         </div>
 
