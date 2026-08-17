@@ -8,7 +8,6 @@ export default function Home() {
   const audioContextRef = useRef<AudioContext | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
   const [isMuted, setIsMuted] = useState(true);
-  const [scrollDetected, setScrollDetected] = useState(false);
   const userInteractedRef = useRef<boolean>(false);
   const audioActivatedRef = useRef<boolean>(false);
 
@@ -113,7 +112,6 @@ export default function Home() {
             videoRef.current.play().catch(() => {});
           }
           setIsMuted(false);
-          setScrollDetected(false);
           audioActivatedRef.current = true;
           return true;
         }
@@ -123,12 +121,11 @@ export default function Home() {
         videoRef.current.muted = false;
         await videoRef.current.play();
         setIsMuted(false);
-        setScrollDetected(false);
         audioActivatedRef.current = true;
         return true;
       }
     } catch {
-      // Browser policy still requires a click/tap/key interaction
+      // Browser policy requires a user gesture
     }
     return false;
   };
@@ -158,17 +155,10 @@ export default function Home() {
     }
   }, [isMuted]);
 
-  // Detect wheel/scroll to show click prompt; activate on valid user gestures (click, key, touch)
+  // Activate audio on first user gesture (pointerdown, click, touch, keydown)
   useEffect(() => {
     let isDone = false;
 
-    // Wheel/scroll: can't activate audio (browser policy), but flag scroll intent
-    const handleWheel = () => {
-      if (isDone || audioActivatedRef.current) return;
-      setScrollDetected(true);
-    };
-
-    // Valid user activation events (click, key, touch) that CAN activate AudioContext
     const handleActivation = async () => {
       if (isDone || audioActivatedRef.current) return;
       const success = await enableSound();
@@ -179,34 +169,15 @@ export default function Home() {
     };
 
     const removeListeners = () => {
-      window.removeEventListener("wheel", handleWheel);
-      document.removeEventListener("wheel", handleWheel);
-      window.removeEventListener("scroll", handleWheel);
-      document.removeEventListener("scroll", handleWheel);
       window.removeEventListener("pointerdown", handleActivation);
-      window.removeEventListener("pointerup", handleActivation);
-      window.removeEventListener("mousedown", handleActivation);
-      window.removeEventListener("mouseup", handleActivation);
       window.removeEventListener("click", handleActivation);
       window.removeEventListener("touchstart", handleActivation);
-      window.removeEventListener("touchend", handleActivation);
       window.removeEventListener("keydown", handleActivation);
     };
 
-    // Wheel/scroll listeners (detect scroll intent)
-    window.addEventListener("wheel", handleWheel, { passive: true });
-    document.addEventListener("wheel", handleWheel, { passive: true });
-    window.addEventListener("scroll", handleWheel, { passive: true });
-    document.addEventListener("scroll", handleWheel, { passive: true });
-
-    // User activation listeners (can actually enable audio)
     window.addEventListener("pointerdown", handleActivation, { passive: true });
-    window.addEventListener("pointerup", handleActivation, { passive: true });
-    window.addEventListener("mousedown", handleActivation, { passive: true });
-    window.addEventListener("mouseup", handleActivation, { passive: true });
     window.addEventListener("click", handleActivation, { passive: true });
     window.addEventListener("touchstart", handleActivation, { passive: true });
-    window.addEventListener("touchend", handleActivation, { passive: true });
     window.addEventListener("keydown", handleActivation, { passive: true });
 
     return () => {
@@ -214,14 +185,15 @@ export default function Home() {
     };
   }, []);
 
-  // Click anywhere on the page to enable sound (works after scroll)
+  // Click anywhere on the page to enable sound
   const handlePageClick = async () => {
-    if (!audioActivatedRef.current) {
+    if (isMuted) {
       await enableSound();
     }
   };
 
-  const toggleMute = async () => {
+  const toggleMute = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     userInteractedRef.current = true;
     if (isMuted) {
       await enableSound();
@@ -232,15 +204,15 @@ export default function Home() {
 
   return (
     <>
-      {/* Main Hero Section — clicking anywhere enables audio after scroll */}
+      {/* Main Hero Section — clicking anywhere enables audio */}
       <section
         onClick={handlePageClick}
-        className="relative min-h-[108vh] w-full flex flex-col items-center justify-center bg-black pt-24 pb-12 px-4 cursor-default"
+        className="relative min-h-screen w-full flex flex-col items-center justify-center bg-black overflow-hidden pt-20 pb-16 px-4 cursor-pointer"
       >
 
-        {/* Subtle click-to-activate prompt shown after wheel scroll detected */}
-        {scrollDetected && isMuted && (
-          <div className="fixed top-24 left-1/2 -translate-x-1/2 z-40 animate-fade-in">
+        {/* Subtle click-to-activate prompt shown when audio is muted */}
+        {isMuted && (
+          <div className="fixed top-24 sm:top-28 left-1/2 -translate-x-1/2 z-40 animate-fade-in pointer-events-none">
             <div className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-black/80 backdrop-blur-md border border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
               <svg className="w-4 h-4 text-gray-300 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M12 12h.01" />
@@ -250,8 +222,8 @@ export default function Home() {
           </div>
         )}
 
-        {/* Cinematic Video Background (Fixed/Cover to remain visible while scrolling) */}
-        <div className="fixed inset-0 z-0 opacity-0 animate-fade-in pointer-events-none" style={{ animationDelay: '0s' }}>
+        {/* Cinematic Video Background */}
+        <div className="absolute inset-0 z-0 opacity-0 animate-fade-in pointer-events-none" style={{ animationDelay: '0s' }}>
           <video
             ref={videoRef}
             autoPlay
