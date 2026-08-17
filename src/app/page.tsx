@@ -8,7 +8,9 @@ export default function Home() {
   const audioContextRef = useRef<AudioContext | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
   const [isMuted, setIsMuted] = useState(true);
+  const [scrollDetected, setScrollDetected] = useState(false);
   const userInteractedRef = useRef<boolean>(false);
+  const audioActivatedRef = useRef<boolean>(false);
 
   // Scroll to top on page mount
   useEffect(() => {
@@ -32,7 +34,7 @@ export default function Home() {
         const ctx = new AudioCtx();
         audioContextRef.current = ctx;
 
-        // Generate smooth pink noise buffer for realistic private jet cabin ambiance
+        // 1. Generate smooth pink noise buffer for realistic private jet cabin ambiance
         const bufferSize = ctx.sampleRate * 2;
         const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
         const output = noiseBuffer.getChannelData(0);
@@ -45,7 +47,7 @@ export default function Home() {
           b3 = 0.86650 * b3 + white * 0.3104856;
           b4 = 0.55000 * b4 + white * 0.5329522;
           b5 = -0.7616 * b5 - white * 0.0168980;
-          output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.08;
+          output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.09;
           b6 = white * 0.115926;
         }
 
@@ -56,16 +58,34 @@ export default function Home() {
         // Lowpass filter for warm jet engine cabin rumble
         const filter = ctx.createBiquadFilter();
         filter.type = "lowpass";
-        filter.frequency.setValueAtTime(220, ctx.currentTime);
+        filter.frequency.setValueAtTime(240, ctx.currentTime);
 
-        const gainNode = ctx.createGain();
-        gainNode.gain.setValueAtTime(0.18, ctx.currentTime);
-        gainNodeRef.current = gainNode;
+        // 2. Subtle low sub-bass engine harmonic drone (58Hz) for rich luxury jet cabin feel
+        const droneOsc = ctx.createOscillator();
+        droneOsc.type = "sine";
+        droneOsc.frequency.setValueAtTime(58, ctx.currentTime);
 
+        const droneGain = ctx.createGain();
+        droneGain.gain.setValueAtTime(0.08, ctx.currentTime);
+
+        // Master gain node
+        const masterGain = ctx.createGain();
+        masterGain.gain.setValueAtTime(0.22, ctx.currentTime);
+        gainNodeRef.current = masterGain;
+
+        // Connect noise graph
         whiteNoise.connect(filter);
-        filter.connect(gainNode);
-        gainNode.connect(ctx.destination);
+        filter.connect(masterGain);
+
+        // Connect drone graph
+        droneOsc.connect(droneGain);
+        droneGain.connect(masterGain);
+
+        // Connect to output destination
+        masterGain.connect(ctx.destination);
+
         whiteNoise.start();
+        droneOsc.start();
       } else if (audioContextRef.current.state === "suspended") {
         audioContextRef.current.resume();
       }
@@ -74,25 +94,43 @@ export default function Home() {
     }
   };
 
-  const enableSound = async () => {
+  const enableSound = async (): Promise<boolean> => {
+    if (audioActivatedRef.current) return true;
     try {
       initAmbientAudio();
-      if (audioContextRef.current && audioContextRef.current.state === "suspended") {
-        await audioContextRef.current.resume();
+      const ctx = audioContextRef.current;
+      if (ctx) {
+        if (ctx.state === "suspended") {
+          await ctx.resume();
+        }
+        if (ctx.state === "running") {
+          if (gainNodeRef.current) {
+            gainNodeRef.current.gain.cancelScheduledValues(ctx.currentTime);
+            gainNodeRef.current.gain.setTargetAtTime(0.22, ctx.currentTime, 0.2);
+          }
+          if (videoRef.current) {
+            videoRef.current.muted = false;
+            videoRef.current.play().catch(() => {});
+          }
+          setIsMuted(false);
+          setScrollDetected(false);
+          audioActivatedRef.current = true;
+          return true;
+        }
       }
+
       if (videoRef.current) {
         videoRef.current.muted = false;
-        await videoRef.current.play().catch(() => {});
+        await videoRef.current.play();
+        setIsMuted(false);
+        setScrollDetected(false);
+        audioActivatedRef.current = true;
+        return true;
       }
-      if (gainNodeRef.current && audioContextRef.current) {
-        const ctx = audioContextRef.current;
-        gainNodeRef.current.gain.cancelScheduledValues(ctx.currentTime);
-        gainNodeRef.current.gain.setTargetAtTime(0.18, ctx.currentTime, 0.2);
-      }
-      setIsMuted(false);
     } catch {
-      // Fallback if browser requires user gesture
+      // Browser policy still requires a click/tap/key interaction
     }
+    return false;
   };
 
   const disableSound = () => {
@@ -114,49 +152,79 @@ export default function Home() {
     }
     if (gainNodeRef.current && audioContextRef.current) {
       const ctx = audioContextRef.current;
-      const targetGain = isMuted ? 0 : 0.18;
+      const targetGain = isMuted ? 0 : 0.22;
       gainNodeRef.current.gain.cancelScheduledValues(ctx.currentTime);
       gainNodeRef.current.gain.setTargetAtTime(targetGain, ctx.currentTime, 0.2);
     }
   }, [isMuted]);
 
-  // Turn on sound on partial scrolling or interaction
+  // Detect wheel/scroll to show click prompt; activate on valid user gestures (click, key, touch)
   useEffect(() => {
-    let triggered = false;
+    let isDone = false;
 
-    const handleScrollOrGesture = () => {
-      if (triggered || userInteractedRef.current) return;
-      triggered = true;
-      enableSound();
-      cleanupListeners();
+    // Wheel/scroll: can't activate audio (browser policy), but flag scroll intent
+    const handleWheel = () => {
+      if (isDone || audioActivatedRef.current) return;
+      setScrollDetected(true);
     };
 
-    const cleanupListeners = () => {
-      window.removeEventListener("scroll", handleScrollOrGesture);
-      window.removeEventListener("wheel", handleScrollOrGesture);
-      window.removeEventListener("touchmove", handleScrollOrGesture);
-      window.removeEventListener("touchstart", handleScrollOrGesture);
-      window.removeEventListener("pointerdown", handleScrollOrGesture);
-      window.removeEventListener("keydown", handleScrollOrGesture);
+    // Valid user activation events (click, key, touch) that CAN activate AudioContext
+    const handleActivation = async () => {
+      if (isDone || audioActivatedRef.current) return;
+      const success = await enableSound();
+      if (success) {
+        isDone = true;
+        removeListeners();
+      }
     };
 
-    // Listen for partial scroll (wheel, scroll, touchmove) and gestures
-    window.addEventListener("scroll", handleScrollOrGesture, { passive: true });
-    window.addEventListener("wheel", handleScrollOrGesture, { passive: true });
-    window.addEventListener("touchmove", handleScrollOrGesture, { passive: true });
-    window.addEventListener("touchstart", handleScrollOrGesture, { passive: true });
-    window.addEventListener("pointerdown", handleScrollOrGesture, { passive: true });
-    window.addEventListener("keydown", handleScrollOrGesture, { passive: true });
+    const removeListeners = () => {
+      window.removeEventListener("wheel", handleWheel);
+      document.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("scroll", handleWheel);
+      document.removeEventListener("scroll", handleWheel);
+      window.removeEventListener("pointerdown", handleActivation);
+      window.removeEventListener("pointerup", handleActivation);
+      window.removeEventListener("mousedown", handleActivation);
+      window.removeEventListener("mouseup", handleActivation);
+      window.removeEventListener("click", handleActivation);
+      window.removeEventListener("touchstart", handleActivation);
+      window.removeEventListener("touchend", handleActivation);
+      window.removeEventListener("keydown", handleActivation);
+    };
+
+    // Wheel/scroll listeners (detect scroll intent)
+    window.addEventListener("wheel", handleWheel, { passive: true });
+    document.addEventListener("wheel", handleWheel, { passive: true });
+    window.addEventListener("scroll", handleWheel, { passive: true });
+    document.addEventListener("scroll", handleWheel, { passive: true });
+
+    // User activation listeners (can actually enable audio)
+    window.addEventListener("pointerdown", handleActivation, { passive: true });
+    window.addEventListener("pointerup", handleActivation, { passive: true });
+    window.addEventListener("mousedown", handleActivation, { passive: true });
+    window.addEventListener("mouseup", handleActivation, { passive: true });
+    window.addEventListener("click", handleActivation, { passive: true });
+    window.addEventListener("touchstart", handleActivation, { passive: true });
+    window.addEventListener("touchend", handleActivation, { passive: true });
+    window.addEventListener("keydown", handleActivation, { passive: true });
 
     return () => {
-      cleanupListeners();
+      removeListeners();
     };
   }, []);
 
-  const toggleMute = () => {
+  // Click anywhere on the page to enable sound (works after scroll)
+  const handlePageClick = async () => {
+    if (!audioActivatedRef.current) {
+      await enableSound();
+    }
+  };
+
+  const toggleMute = async () => {
     userInteractedRef.current = true;
     if (isMuted) {
-      enableSound();
+      await enableSound();
     } else {
       disableSound();
     }
@@ -164,8 +232,23 @@ export default function Home() {
 
   return (
     <>
-      {/* Main Hero Section with Subtle Height for Natural Desktop Scrolling */}
-      <section className="relative min-h-[108vh] w-full flex flex-col items-center justify-center bg-black pt-24 pb-12 px-4">
+      {/* Main Hero Section — clicking anywhere enables audio after scroll */}
+      <section
+        onClick={handlePageClick}
+        className="relative min-h-[108vh] w-full flex flex-col items-center justify-center bg-black pt-24 pb-12 px-4 cursor-default"
+      >
+
+        {/* Subtle click-to-activate prompt shown after wheel scroll detected */}
+        {scrollDetected && isMuted && (
+          <div className="fixed top-24 left-1/2 -translate-x-1/2 z-40 animate-fade-in">
+            <div className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-black/80 backdrop-blur-md border border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
+              <svg className="w-4 h-4 text-gray-300 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M12 12h.01" />
+              </svg>
+              <span className="text-xs sm:text-sm text-gray-200 font-medium tracking-wide">Click anywhere to enable audio</span>
+            </div>
+          </div>
+        )}
 
         {/* Cinematic Video Background (Fixed/Cover to remain visible while scrolling) */}
         <div className="fixed inset-0 z-0 opacity-0 animate-fade-in pointer-events-none" style={{ animationDelay: '0s' }}>
