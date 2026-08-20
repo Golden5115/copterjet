@@ -20,7 +20,7 @@ export default function Home() {
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.muted = true;
-      videoRef.current.play().catch(() => {});
+      videoRef.current.play().catch(() => { });
     }
   }, []);
 
@@ -109,7 +109,7 @@ export default function Home() {
           }
           if (videoRef.current) {
             videoRef.current.muted = false;
-            videoRef.current.play().catch(() => {});
+            videoRef.current.play().catch(() => { });
           }
           setIsMuted(false);
           audioActivatedRef.current = true;
@@ -283,14 +283,14 @@ export default function Home() {
             className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight drop-shadow-2xl opacity-0 animate-fade-up"
             style={{ animationDelay: '0.4s' }}
           >
-            Elevate Your Journey
+            Rise High. Elevate Your Journey.
           </h1>
 
           <p
             className="text-xl md:text-2xl text-gray-200 mb-12 max-w-3xl font-light drop-shadow-lg opacity-0 animate-fade-up"
             style={{ animationDelay: '0.6s' }}
           >
-            Experience unparalleled luxury, efficiency, and safety with our exclusive flight charter services.
+            Experience bespoke flight charter solutions with comfort, safety, and excellence.
           </p>
 
           <div
